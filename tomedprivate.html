@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        h1 {
+    background: linear-gradient(to right, #004ef5, #000000);
+    color: white;
+    padding: 10px 20px; /* Reduced padding */
+    text-align: left;
+    margin: 0;
+    box-sizing: border-box;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h1 img {
+    height: 50px; /* Increased size */
+    width: auto;
+    align-self: center; /* Keeps image centered without affecting the row */
+}
+
+
+
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 18px;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e4e4e4;
+        }
+        
+        .team-row {
+            background-color: #f0f0f0;
+            
+            cursor: pointer;
+        }
+        .participant-row {
+            background-color: #f9f9f9;
+            display: none;
+        }
+        .participant-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-analytics.js";
+
+        import firebaseConfig from './firebaseconfig.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tableBody = document.querySelector('#participants-table tbody');
+
+            try {
+                const q = query(collection(db, 'pieteikumsTome'), orderBy('submissionTime'));
+                const querySnapshot = await getDocs(q);
+                let index = 1;
+
+                querySnapshot.forEach((docSnapshot) => {
+                    const data = docSnapshot.data();
+                    const teamId = docSnapshot.id;
+
+                    const teamRow = document.createElement('tr');
+                    teamRow.className = 'team-row';
+                    teamRow.innerHTML = `
+                        <td>${index++}</td>
+                        <td>${data.nosaukums || 'N/A'}</td>
+                        <td>${data.distance || 'N/A'}</td>
+                        <td>${data.grupa || 'N/A'}</td>
+                        <td>${data.epasts || 'N/A'}</td>
+                        <td>${data.telefons || 'N/A'}</td>
+                        <td>${data.atlaide || 'None'}</td>
+                        <td>${data.news || 'None'}</td>
+                        <td>${data.samaksa || 'None'}</td>
+                        <td>${new Date(data.submissionTime).toLocaleString() || 'N/A'}</td>
+                        <td><input type="checkbox" class="paid-checkbox" data-id="${teamId}" ${data.paid ? 'checked' : ''}></td>
+                    `;
+                    tableBody.appendChild(teamRow);
+                    if (data.dalibnieki && Array.isArray(data.dalibnieki)) {
+                        let index = 0;
+                        data.dalibnieki.forEach((participant) => {
+                            const participantRow = document.createElement('tr');
+                            participantRow.className = 'participant-row';
+                            participantRow.style.display = 'none';
+                            
+                            index++;
+
+                            participantRow.innerHTML = `
+                                <td colspan="11">
+                                    <div class="participant-details">
+                                        <div><strong>${participant.vards || 'N/A'} ${participant.uzvards || 'N/A'}</strong></div>
+                                        <div>${participant.dzimums || 'N/A'}</div>
+                                        <div>${participant.birthday || 'N/A'} (Age:${participant.age})</div>
+                                        <div>${participant.country || 'N/A'}</div>
+                                        <div>Idents: ${participant.idents || 'N/A'} (${participant.identNumber || 'N/A'})</div>
+                                        <div>Kompass: ${participant.kompass || 'N/A'}</div>
+                                        <div>Piezīmes: ${participant.komentars || 'N/A'}</div>
+                                        <div>${data["samaksa" + index.toLocaleString()]} EUR</div>
+                                    </div>
+                                </td>
+                            `;
+                            tableBody.appendChild(participantRow);
+                        });
+
+                        teamRow.addEventListener('click', () => {
+                            if (event.target.classList.contains('paid-checkbox')) {
+        event.stopPropagation();
+        return;
+    }
+                            let nextRow = teamRow.nextElementSibling;
+                            while (nextRow && nextRow.classList.contains('participant-row')) {
+                                nextRow.style.display = nextRow.style.display === 'none' ? 'table-row' : 'none';
+                                nextRow = nextRow.nextElementSibling;
+                            }
+                        });
+                    }
+                });
+
+                document.addEventListener('change', async (event) => {
+                    if (event.target.classList.contains('paid-checkbox')) {
+                        const teamId = event.target.getAttribute('data-id');
+                        const isChecked = event.target.checked;
+
+                        try {
+                            await updateDoc(doc(db, 'pieteikumsTome', teamId), {
+                                paid: isChecked
+                            });
+                            console.log(`Updated paid status for team ${teamId} to ${isChecked}`);
+                        } catch (error) {
+                            console.error('Error updating paid status:', error);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Error getting documents: ", error);
+            }
+
+
+            document.getElementById('search-bar').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#participants-table tbody tr');
+
+    rows.forEach(row => {
+        // Get text from all columns
+        const text = row.textContent.toLowerCase();
+        // Show/hide based on match
+        row.style.display = text.includes(filter) ? 'table-row' : 'none';
+    });
+});
+        });
+    </script>
+</head>
+<body>
+    <h1>Dalībnieku saraksts <img src="image/kpunktslogo.png"></h1>
+    <input type="text" id="search-bar" class="search-bar" placeholder="Search..." style="width: 100%; padding: 10px; font-size: 16px;">
+
+<table id="participants-table">
+    <table id="participants-table">
+        <thead>
+            <tr class="menu">
+                <th>Nr.</th>
+                <th>Nosaukums</th>
+                <th>Distance</th>
+                <th>Grupa</th>
+                <th>E-pasts</th>
+                <th>Telefons</th>
+                <th>Atlaide</th>
+                <th>News</th>                
+                <th>EUR (Kopā)</th>
+                <th>Time</th>
+                <th>Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+</body>
+</html>
