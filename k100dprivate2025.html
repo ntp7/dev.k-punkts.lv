@@ -63,26 +63,16 @@
         input[type="checkbox"] {
             cursor: pointer;
         }
-
-        /* Initially hide the hidden participants section */
-        #hidden-participants-section {
-            display: none;
+        @media only screen and (max-width: 600px) {
+            h1{
+                width: 1800px;
+            }
+            table{
+                width:1800px
+            }
+            
         }
 
-        /* Style for the toggle button */
-        .toggle-button {
-            cursor: pointer;
-            background-color: #f58b00;
-            color: white;
-            padding: 10px;
-            margin-top: 20px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .toggle-button:hover {
-            background-color: #c26e00;
-        }
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
@@ -143,48 +133,16 @@
                 document.getElementById('value3').textContent = totalWomen;
                 document.getElementById('value4').textContent = totalMen;
 
-                // Add event listeners for the checkboxes in both tables
-                document.querySelector('body').addEventListener('change', async (event) => {
-                    if (event.target.type === 'checkbox') {
-                        const docId = event.target.getAttribute('data-id');
-                        const isChecked = event.target.checked;
-
-                        // Determine which checkbox was changed
-                        const fieldToUpdate = event.target.closest('tr').querySelector('input[type="checkbox"]:first-of-type') === event.target ? 'nosutits' : 'samaksats';
-
-                        // Update the Firestore document
-                        try {
-                            await updateDoc(doc(db, 'pieteikums100km2025', docId), {
-                                [fieldToUpdate]: isChecked
-                            });
-                            console.log(`Document ${docId} updated successfully: ${fieldToUpdate} set to ${isChecked}`);
-                        } catch (error) {
-                            console.error("Error updating document: ", error);
-                        }
-                    }
-                });
 
             } catch (error) {
                 console.error("Error getting documents: ", error);
             }
-
-            // Add toggle functionality for the hidden participants table
-            const toggleButton = document.getElementById('toggle-hidden-participants');
-            const hiddenSection = document.getElementById('hidden-participants-section');
-
-            toggleButton.addEventListener('click', () => {
-                if (hiddenSection.style.display === 'none' || hiddenSection.style.display === '') {
-                    hiddenSection.style.display = 'block';
-                } else {
-                    hiddenSection.style.display = 'none';
-                }
-            });
         });
     </script>
 </head>
 <body>
     <h1>        <div class="header-content">
-            <span>Dalībnieku saraksts <span style="font-size: 18px; color: rgb(255, 167, 167);padding-left: 15px;">K-100 2025</span></span>
+            <span>Dalībnieku saraksts <span style="font-size: 18px; color: rgb(255, 167, 167);padding-left: 15px">K-100 2025</span></span>
             
             
 
@@ -228,37 +186,5 @@
         <tbody>
         </tbody>
     </table>
-
-    <!-- Toggle Button -->
-
-    <!-- Hidden Participants Section (Initially Hidden) -->
-    <div id="hidden-participants-section">
-
-        <table id="hidden-participants-table">
-            <thead>
-                <tr>
-                    <th>Nr.</th>
-                    <th>Vārds</th>
-                    <th>Uzvārds</th>
-                    <th>Dzimums</th>
-                    <th>Epasts</th>
-                    <th>Telefons</th>
-                    <th>Dzimšanas diena</th>
-                    <th>Valsts</th>
-                    <th>Ēdiens</th>
-                    <th>Ēdiens2</th>
-                    <th>Sekot</th>
-                    <th>Atlaide</th>
-                    <th>Komentārs</th>
-                    <th>News</th>
-                    <th>Reģistrācijas laiks</th>
-                    <th>Samaksa</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Hidden participant rows will be appended here by JavaScript -->
-            </tbody>
-        </table>
-    </div>
 </body>
 </html>
