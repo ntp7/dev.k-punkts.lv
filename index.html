@@ -161,7 +161,8 @@
         function checkPassword() {
             const input = document.getElementById("passwordInput").value;
             if (input === correctPassword) {
-                window.open('https://dev.k-punkts.lv/k100dprivate2025.html', '_blank');
+                const url = `https://dev.k-punkts.lv/k100dprivate2025.html`;
+                window.location.href = url;
                 closePasswordModal();
             } else {
                 alert("Nepareiza parole!");
