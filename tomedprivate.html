@@ -11,28 +11,44 @@
             margin: 0;
         }
         h1 {
-    background: linear-gradient(to right, #004ef5, #000000);
-    color: white;
-    padding: 10px 20px; /* Reduced padding */
-    text-align: left;
-    margin: 0;
-    box-sizing: border-box;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-h1 img {
-    height: 50px; /* Increased size */
-    width: auto;
-    align-self: center; /* Keeps image centered without affecting the row */
-}
-
-
-
-
-
+            background: linear-gradient(to right, #004ef5, #000000);
+            color: white;
+            padding: 10px 20px;
+            text-align: left;
+            margin: 0;
+            box-sizing: border-box;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        h1 img {
+            height: 50px;
+            width: auto;
+            align-self: center;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+        .header-list {
+            align-items: right;
+        }
+        .header-collumn {
+            display: grid;
+            grid-template-columns: max-content max-content;
+            row-gap: 5px;
+            column-gap: 30px;
+            font-size: 14px;
+            margin-left: 20px;
+            padding-right: 20px;
+            align-items: center;
+        }
+        .header-list div {
+            white-space: nowrap;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -49,10 +65,8 @@ h1 img {
         tr:hover {
             background-color: #e4e4e4;
         }
-        
         .team-row {
             background-color: #f0f0f0;
-            
             cursor: pointer;
         }
         .participant-row {
@@ -64,7 +78,6 @@ h1 img {
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
-        
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
@@ -80,6 +93,16 @@ h1 img {
         document.addEventListener('DOMContentLoaded', async () => {
             const tableBody = document.querySelector('#participants-table tbody');
 
+            let totalParticipants = 0;
+            let totalTeams = 0;
+            let identCount = 0;
+            let compassCount = 0;
+            let totalEur = 0;
+            let total3h = 0;
+            let total9h = 0;
+            let totalWomen = 0;
+            let totalMen = 0;
+
             try {
                 const q = query(collection(db, 'pieteikumsTome'), orderBy('submissionTime'));
                 const querySnapshot = await getDocs(q);
@@ -88,6 +111,15 @@ h1 img {
                 querySnapshot.forEach((docSnapshot) => {
                     const data = docSnapshot.data();
                     const teamId = docSnapshot.id;
+                    if (data.hide) return;
+                    totalTeams++;
+                    totalEur += data.samaksa;
+                    if(data.distance === "3h"){
+                        total3h++;
+                    }
+                    if(data.distance === "9h"){
+                        total9h++;
+                    } 
 
                     const teamRow = document.createElement('tr');
                     teamRow.className = 'team-row';
@@ -105,14 +137,28 @@ h1 img {
                         <td><input type="checkbox" class="paid-checkbox" data-id="${teamId}" ${data.paid ? 'checked' : ''}></td>
                     `;
                     tableBody.appendChild(teamRow);
+
                     if (data.dalibnieki && Array.isArray(data.dalibnieki)) {
+                        totalParticipants += data.dalibnieki.length;
                         let index = 0;
                         data.dalibnieki.forEach((participant) => {
                             const participantRow = document.createElement('tr');
                             participantRow.className = 'participant-row';
                             participantRow.style.display = 'none';
-                            
                             index++;
+                            // Count ident and compass
+                            if (participant.idents === 'iret') {
+                                identCount++;
+                            }
+                            if (participant.kompass === 'iret') {
+                                compassCount++;
+                            }
+                            if (participant.dzimums === 'sieviete') {
+                                totalWomen++;
+                            }
+                            if (participant.dzimums === 'virietis') {
+                                totalMen++;
+                            }
 
                             participantRow.innerHTML = `
                                 <td colspan="11">
@@ -131,11 +177,11 @@ h1 img {
                             tableBody.appendChild(participantRow);
                         });
 
-                        teamRow.addEventListener('click', () => {
+                        teamRow.addEventListener('click', (event) => {
                             if (event.target.classList.contains('paid-checkbox')) {
-        event.stopPropagation();
-        return;
-    }
+                                event.stopPropagation();
+                                return;
+                            }
                             let nextRow = teamRow.nextElementSibling;
                             while (nextRow && nextRow.classList.contains('participant-row')) {
                                 nextRow.style.display = nextRow.style.display === 'none' ? 'table-row' : 'none';
@@ -144,6 +190,15 @@ h1 img {
                         });
                     }
                 });
+                document.getElementById('value1').textContent = identCount;
+                document.getElementById('value2').textContent = compassCount;
+                document.getElementById('value3').textContent = totalParticipants;
+                document.getElementById('value4').textContent = totalTeams;
+                document.getElementById('value5').textContent = totalEur;
+                document.getElementById('value7').textContent = total3h;
+                document.getElementById('value8').textContent = total9h;
+                document.getElementById('value9').textContent = totalWomen;
+                document.getElementById('value10').textContent = totalMen;
 
                 document.addEventListener('change', async (event) => {
                     if (event.target.classList.contains('paid-checkbox')) {
@@ -164,26 +219,52 @@ h1 img {
                 console.error("Error getting documents: ", error);
             }
 
-
             document.getElementById('search-bar').addEventListener('input', function() {
-    const filter = this.value.toLowerCase();
-    const rows = document.querySelectorAll('#participants-table tbody tr');
-
-    rows.forEach(row => {
-        // Get text from all columns
-        const text = row.textContent.toLowerCase();
-        // Show/hide based on match
-        row.style.display = text.includes(filter) ? 'table-row' : 'none';
-    });
-});
+                const filter = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#participants-table tbody tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? 'table-row' : 'none';
+                });
+            });
         });
     </script>
 </head>
 <body>
-    <h1>Dalībnieku saraksts <img src="logo.png"></h1>
+    <h1>
+        <div class="header-content">
+            <span>Dalībnieku saraksts</span>
+            <div class="header-list"></div>
+<div class="header-collumn">
+    <div>Identu īre:</div><div id="value1"></div>
+    <div>Kompasu īre:</div><div id="value2"></div>
+</div>
+<div class="header-collumn">
+    <div>Dalībnieku skaits:</div><div id="value3"></div>
+    <div>Komandu skaits:</div><div id="value4"></div>
+</div>
+<div class="header-collumn">
+    <div>Kopā EUR:</div><div id="value5"></div>
+    <div></div><div id="value6"></div>
+</div>
+<div class="header-collumn">
+    <div>Dalībnieki 3h:</div><div id="value7"></div>
+    <div>Dalībnieki 9h:</div><div id="value8"></div>
+</div>
+<div class="header-collumn">
+    <div>Sievietes:</div><div id="value9"></div>
+    <div>Vīrieši:</div><div id="value10"></div>
+</div>
+</div>
+
+
+
+        </div>
+        <img src="image/kpunktslogo.png" alt="Kpunkts Logo">
+    </h1>
+
     <input type="text" id="search-bar" class="search-bar" placeholder="Search..." style="width: 100%; padding: 10px; font-size: 16px;">
 
-<table id="participants-table">
     <table id="participants-table">
         <thead>
             <tr class="menu">
@@ -194,7 +275,7 @@ h1 img {
                 <th>E-pasts</th>
                 <th>Telefons</th>
                 <th>Atlaide</th>
-                <th>News</th>                
+                <th>News</th>
                 <th>EUR (Kopā)</th>
                 <th>Time</th>
                 <th>Paid</th>
