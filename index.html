@@ -3,119 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dev.k-punkts.lv</title>
+    <title>Brīvprātīgie</title>
     
     <!-- Import the Oswald font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
 
-<style>
-body {
-    background-color: #121212;
-    color: #ffffff;
-    font-family: 'Oswald', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    min-height: 100vh;
-    text-align: center;
-    box-sizing: border-box;
-    position: relative;
-    padding: 0 20px; /* optional horizontal padding for small screens */
-}
+    <!-- Styling for the dark theme and larger elements -->
+    <style>
+        body {
+            background-color: #121212; /* Dark background */
+            color: #ffffff; /* Light text for dark theme */
+            font-family: 'Oswald', sans-serif; /* Use Oswald font */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items at the top */
+            margin: 0;
+            min-height: 100vh; /* Minimum height to allow scrolling */
+            overflow-y: auto; /* Allow vertical scrolling */
+            text-align: center;
+        }
 
-    .logo {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: 50px;
-        height: auto;
-        z-index: 1000;
-    }
+        /* Logo styling */
+        .logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 50px; /* Adjust logo size as needed */
+            height: auto;
+            z-index: 1000; /* Ensure the logo is on top of other elements */
+        }
 
-    h1 {
-        font-size: 2.5em;
-        margin-top: 30px;
-        margin-bottom: 10px;
-    }
+        h1 {
+            font-size: 2.5em; /* Slightly smaller for mobile */
+            margin-top: 80px; /* Space below logo */
+            margin-bottom: 10px;
+        }
 
-    .login-container {
-        padding: 30px;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 400px;
-        margin: 40px auto;
-    }
+        .button {
+            font-size: 1.5em;
+            padding: 15px 20px; /* Adjust padding for larger touch targets */
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s; /* Smooth transition for button color */
+            width: 80%; /* Full-width buttons for easier tapping on mobile */
+            max-width: 300px; /* Limit max width for larger screens */
+        }
 
-    .login-container input[type="text"],
-    .login-container input[type="password"] {
-        width: 100%;
-        padding: 12px;
-        margin: 10px 0;
-        border: 1px solid #444;
-        border-radius: 5px;
-        background-color: #ffffff;
-        color: #000000;
-        font-family: 'Oswald', sans-serif;
-        font-size: 1em;
-    }
+        .button:hover {
+            background-color: #777; /* Change button color on hover */
+        }
 
-    .login-container button {
-        width: 100%;
-        padding: 12px;
-        background-color: #ff9100;
-        border: none;
-        border-radius: 5px;
-        color: #fff;
-        font-size: 1em;
-        font-family: 'Oswald', sans-serif;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
+        /* Help link styling */
+        .help-link {
+            color: #cccccc; /* Neutral light gray color */
+            font-family: 'Times New Roman', Times, serif; /* Standard serif font */
+            font-size: 1em; /* Standard font size */
+            margin-top: 100px; /* Push link to the bottom */
+            text-decoration: underline;
+        }
 
-    .login-container button:hover {
-        background-color: #ff910094;
-    }
-</style>
+        .help-link:hover {
+            text-decoration: none; /* Underline on hover */
+        }
 
+        /* Media query for larger screens */
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 3em; /* Larger heading on desktop */
+            }
+
+            .button {
+                width: 50%; /* Less width for buttons on larger screens */
+            }
+        }        
+    </style>
+
+    <script>
+        function navigateToKP(selectedValue) {
+            // Construct the URL to navigate to
+            const url = `https://dev.k-punkts.lv/${selectedValue}.html`;
+            // Redirect to the corresponding page
+            window.location.href = url;
+        }
+    </script>
 </head>
 <body>
+    <!-- Logo image at the top-left corner -->
     <img src="logo.png" alt="Logo" class="logo">
-    <h1>K-PUNKTS DEVELOPER</h1>
 
-  <div class="login-container">
-  <form method="POST" action="/login">
-    <input type="text" name="username" placeholder="Username" required />
-    <input type="password" name="password" placeholder="Password" required />
-    <button type="submit">Login</button>
-  </form>
-  </div>
+    <h1>KURĀ KP TU SĒDI?:</h1>
+
+    <button class="button" onclick="navigateToKP(2)">KP2</button>
+    <button class="button" onclick="navigateToKP(3)">KP3</button>
+    <button class="button" onclick="navigateToKP(4)">KP4</button>
+    <button class="button" onclick="navigateToKP(5)">KP5</button>
+    <button class="button" onclick="window.open('https://dev.k-punkts.lv/izstasanas.html')" target="_blank" style="color: rgb(0, 238, 255);">Izstāšanās</button>
+
+    <!-- <a onclick="window.open('https://dev.k-punkts.lv/whatsapp.html')" target="_blank" class="help-link">Palīdzība</a> -->
+
 </body>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-analytics.js";
-        import firebaseConfig from './firebaseconfig.js';
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const analytics = getAnalytics(app);
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const q = query(collection(db, 'pieteikumsTome'), orderBy('submissionTime'));
-            const querySnapshot = await getDocs(q);
-            const tableBody = document.getElementById('participants-table');
-
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${data.nosaukums || 'Unknown'}</td>
-                    <td>${data.submissionTime || 'No time'}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        });
-    </script>
 </html>

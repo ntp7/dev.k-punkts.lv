@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participants Registration</title>
+    
+    <!-- Import Firebase Libraries -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
+        import firebaseConfig from './firebaseconfig.js';
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+    
+        // Fetch and display participants
+// Fetch and display participants
+async function fetchParticipants() {
+    const participantsBox = document.getElementById('participants-box');
+    const registeredBox = document.getElementById('registered-box');
+    participantsBox.innerHTML = "";  // Clear existing data
+    registeredBox.innerHTML = "";    // Clear registered box
+
+    try {
+        const querySnapshot = await getDocs(collection(db, 'pieteikums100km2025'));
+        
+        // Create an array to hold participant data
+        const participants = [];
+
+        // Iterate over querySnapshot and push participant data into the array
+        querySnapshot.forEach((docSnapshot) => {
+            const data = docSnapshot.data();
+            const docId = docSnapshot.id;
+
+            // Skip participants where izstajies is true
+            if (data.izstajies !== true) {
+                participants.push({ ...data, id: docId });
+            }
+        });
+
+        // Sort participants by surname
+        participants.sort((a, b) => {
+            return a.uzvards.localeCompare(b.uzvards); // Sort by surname
+        });
+
+        // Display participants in respective boxes
+        participants.forEach(participant => {
+            const participantDiv = createParticipantDiv(participant, !!participant.KP3, participant.id);
+            if (participant.KP3) {
+                registeredBox.appendChild(participantDiv);
+            } else {
+                participantsBox.appendChild(participantDiv);
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching participants: ", error);
+    }
+}
+
+    
+        // Create a participant entry with name, surname, and buttons
+        // Create a participant entry with name, surname, and buttons
+function createParticipantDiv(data, isRegistered, docId) {
+    const div = document.createElement('div');
+    div.classList.add('participant');
+
+    // Fill participant data
+    div.innerHTML = `<strong>${data.uzvards} ${data.vards}</strong>`;
+    
+    if (isRegistered) {
+        // Append KP3 if the participant is registered
+        const kp3Span = document.createElement('span');
+        kp3Span.textContent = `(${data.KP3})`;
+        kp3Span.style.marginRight = '10px';
+
+        const kp3Container = document.createElement('div');
+        kp3Container.style.display = 'flex';
+        kp3Container.style.alignItems = 'center';
+
+        kp3Container.appendChild(kp3Span);
+        // Add "Remove" button to registered participants
+        const removeButton = createRemoveButton(docId, div);
+        kp3Container.appendChild(removeButton);
+        div.appendChild(kp3Container);
+    } else {
+        // Add "Register" button to unregistered participants
+        const registerButton = createRegisterButton(docId, div);
+        div.appendChild(registerButton);
+    }
+
+    return div;
+}
+
+    
+        // Register participant by setting KP3 to the current time and move to the right box
+// Register participant by setting KP3 to the current date and time, and move to the right box
+async function registerParticipant(docId, participantDiv) {
+    const now = new Date();
+
+    // Get day, month, year, hours, minutes, and seconds
+    const day = now.getDate().toString().padStart(2, '0');       // Ensure two digits for the day
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Ensure two digits for the month
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, '0');  // Ensure two digits for hours
+    const minutes = now.getMinutes().toString().padStart(2, '0'); // Ensure two digits for minutes
+    const seconds = now.getSeconds().toString().padStart(2, '0'); // Ensure two digits for seconds
+
+    // Format the date as "dd/mm/yyyy hh:mm:ss"
+    const currentTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+
+    try {
+        // Update the participant's KP3 field with the formatted date and time
+        await updateDoc(doc(db, 'pieteikums100km2025', docId), { KP3: currentTime });
+
+        // Move the participant to the registered box
+        const registeredBox = document.getElementById('registered-box');
+        participantDiv.querySelector('button').remove(); // Remove register button
+
+        // Create a container div for KP3 and the remove button
+        const kp3Container = document.createElement('div');
+        kp3Container.style.display = 'flex';
+        kp3Container.style.alignItems = 'center';
+        
+        // Create a span element for KP3 and append it to the container
+        const kp3Span = document.createElement('span');
+        kp3Span.textContent = `(${currentTime})`; // Set the text content to the formatted date and time
+        kp3Span.style.marginRight = '10px'; // Add some right margin for spacing
+        kp3Container.appendChild(kp3Span);
+
+        // Add the remove button to the container
+        kp3Container.appendChild(createRemoveButton(docId, participantDiv));
+
+        // Append the container div to participantDiv
+        participantDiv.appendChild(kp3Container);
+        
+        // Move the updated participantDiv to the registered box
+        registeredBox.appendChild(participantDiv);
+    } catch (error) {
+        console.error("Error updating participant: ", error);
+    }
+}
+
+
+
+    
+        // Remove registration by setting KP3 to empty and move to the left box
+        async function removeRegistration(docId, participantDiv) {
+            try {
+                await updateDoc(doc(db, 'pieteikums100km2025', docId), { KP3: "" });
+                const participantsBox = document.getElementById('participants-box');
+                participantDiv.querySelector('button').remove();
+                participantDiv.appendChild(createRegisterButton(docId, participantDiv));// Add "Register" button
+                participantsBox.appendChild(participantDiv);
+                fetchParticipants();
+            }
+            
+            catch (error) {
+                console.error("Error removing registration: ", error);
+            }
+        }
+        // Helper function to create "Register" button
+        function createRegisterButton(docId, participantDiv) {
+            const registerButton = document.createElement('button');
+            registerButton.textContent = 'Register';
+            registerButton.onclick = () => registerParticipant(docId, participantDiv);
+            return registerButton;
+        }
+    
+        // Helper function to create "Remove" button
+        function createRemoveButton(docId, participantDiv) {
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.onclick = () => removeRegistration(docId, participantDiv);
+            return removeButton;
+        }
+    
+        // Run fetchParticipants on page load
+        document.addEventListener('DOMContentLoaded', fetchParticipants);
+    </script>
+    
+    <!-- Style for layout and participants boxes -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>KP3 (Slokas Karjers)</h1>
+    <!-- Container for both boxes -->
+    <div id="participants-container">
+        <!-- Box for listing unregistered participants -->
+        <div id="participants-box">
+            <h2>Unregistered Participants</h2>
+        </div>
+
+        <!-- Box for registered participants -->
+        <div id="registered-box">
+            <h2>Registered Participants</h2>
+        </div>
+    </div>
+
+</body>
+</html>
