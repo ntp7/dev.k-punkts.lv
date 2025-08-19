@@ -1,0 +1,81 @@
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            height: 100%;
+        }
+
+        /* Left box for participants list */
+        #participants-box, #registered-box {
+            width: 500px;
+            height: 100%;
+            /* overflow-y: auto; */
+
+            padding: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+        #participants-box{
+            background-color: #ffffff;
+        }
+
+        #registered-box {
+            background-color: #e0f7fa; /* Different background for registered box */
+        }
+
+        /* Style for participant entries */
+        .participant {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .participant:last-child {
+            border-bottom: none;
+        }
+
+        /* Style for Register and Remove buttons */
+        .participant button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .participant button:hover {
+            background-color: #45a049;
+        }
+
+        /* Flex styling for left and right box layout */
+        #participants-container {
+            display: flex;
+            width: 100%;
+        }
+        @media only screen and (max-width: 600px) {
+            #participants-container {
+                flex-direction: column;
+            }
+            #participants-box, #registered-box {
+            width: auto;
+            height: 100%;
+            /* overflow-y: auto; */
+            padding: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+        }
+
+        /* Title styling */
+        h2 {
+            text-align: center;
+        }
+        h1{
+            text-align: left;
+            padding: 0 30px;
+        }
+    
