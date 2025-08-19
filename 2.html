@@ -96,9 +96,6 @@ function createParticipantDiv(data, isRegistered, docId) {
     
         // Register participant by setting KP2 to the current time and move to the right box
 // Register participant by setting KP2 to the current date and time, and move to the right box
-// Register participant by setting KP2 to the current date and time, and move to the right box
-// Register participant by setting KP2 to the current date and time, and move to the right box
-// Register participant by setting KP2 to the current date and time, and move to the right box
 async function registerParticipant(docId, participantDiv) {
     const now = new Date();
 
@@ -147,9 +144,6 @@ async function registerParticipant(docId, participantDiv) {
 
 
 
-
-
-
     
         // Remove registration by setting KP2 to empty and move to the left box
         async function removeRegistration(docId, participantDiv) {
@@ -190,9 +184,8 @@ async function registerParticipant(docId, participantDiv) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
+    <h1>KP2 (Slokas Karjers)</h1>
     <!-- Container for both boxes -->
-     <h1>KP2 (Ložmetējkalns)</h1>
     <div id="participants-container">
         <!-- Box for listing unregistered participants -->
         <div id="participants-box">
