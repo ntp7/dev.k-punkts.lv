@@ -23,7 +23,7 @@
             registeredBox.innerHTML = "";    // Clear registered box
     
             try {
-                const querySnapshot = await getDocs(collection(db, 'pieteikums100km'));
+                const querySnapshot = await getDocs(collection(db, 'pieteikums100km2025'));
                 
                 // Create an array to hold participant data
                 const participants = [];
@@ -77,7 +77,7 @@
         async function registerParticipant(docId, participantDiv) {
             try {
                 // Update the participant's izstajies field to true
-                await updateDoc(doc(db, 'pieteikums100km', docId), { izstajies: true });
+                await updateDoc(doc(db, 'pieteikums100km2025', docId), { izstajies: true });
     
                 // Move the participant to the registered box
                 const registeredBox = document.getElementById('registered-box');
@@ -95,7 +95,7 @@
         async function removeRegistration(docId, participantDiv) {
             try {
                 // Update the participant's izstajies field to false
-                await updateDoc(doc(db, 'pieteikums100km', docId), { izstajies: false });
+                await updateDoc(doc(db, 'pieteikums100km2025', docId), { izstajies: false });
                 
                 // Move the participant back to the unregistered box
                 const participantsBox = document.getElementById('participants-box');
