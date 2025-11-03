@@ -100,7 +100,10 @@
                 let index = 1;
 
                 querySnapshot.forEach((docSnapshot) => {
+                 
+
                     const data = docSnapshot.data();
+                    if (data.hide) return;
                     const row = document.createElement('tr');
 
                     // Otherwise, add to the main table
@@ -129,7 +132,7 @@
                     tableBody.appendChild(row);
                 });
                  document.getElementById('value1').textContent = totalParticipants;
-                document.getElementById('value2').textContent = totalEur;
+                document.getElementById('value2').textContent = totalEur + 24;
                 document.getElementById('value3').textContent = totalWomen;
                 document.getElementById('value4').textContent = totalMen;
 
