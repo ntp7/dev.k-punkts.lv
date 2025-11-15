@@ -31,6 +31,7 @@
                 // Iterate over querySnapshot and push participant data into the array
                 querySnapshot.forEach((docSnapshot) => {
                     const data = docSnapshot.data();
+                    if (data.hide) return;
                     const docId = docSnapshot.id;
     
                     // Add each participant's data to the array
