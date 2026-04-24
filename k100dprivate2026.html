@@ -89,6 +89,8 @@
             const tableBody = document.querySelector('#participants-table tbody');
             
             let totalParticipants = 0;
+            let participants50km = 0;
+            let participants100km = 0;
             let totalEur = 0;
             let totalWomen = 0;
             let totalMen = 0;
@@ -131,10 +133,16 @@
                     totalEur += data.samaksa;
                     if(data.dzimums == "virietis") totalMen++;
                     if(data.dzimums == "sieviete") totalWomen++;
+                    // Count participants by distance
+                    if(data.distance == "50km") participants50km++;
+                    if(data.distance == "100km") participants100km++;
+                    
                     tableBody.appendChild(row);
                 });
-                 document.getElementById('value1').textContent = totalParticipants;
-                document.getElementById('value2').textContent = totalEur + 24 + 30;
+                 document.getElementById('value0').textContent = totalParticipants;
+                document.getElementById('value1').textContent = participants50km;
+                document.getElementById('value1b').textContent = participants100km;
+                document.getElementById('value2').textContent = totalEur;
                 document.getElementById('value3').textContent = totalWomen;
                 document.getElementById('value4').textContent = totalMen;
 
@@ -152,7 +160,15 @@
             
 
             <div class="header-collumn">
-                <div>Dalībnieku skaits:</div><div id="value1"></div>
+                <div>Dalībnieku skaits kopā:</div><div id="value0"></div>
+            </div>
+            <div class="header-collumn" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: grid; grid-template-columns: max-content max-content; gap: 30px; align-items: center;">
+                    <div>Dalībnieku skaits 50km:</div><div id="value1"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: max-content max-content; gap: 30px; align-items: center;">
+                    <div>Dalībnieku skaits 100km:</div><div id="value1b"></div>
+                </div>
             </div>
             <div class="header-collumn">
                 <div>Kopā EUR:</div><div id="value2"></div>
