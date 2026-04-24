@@ -24,7 +24,7 @@ async function fetchParticipants() {
     registeredBox.innerHTML = "";    // Clear registered box
 
     try {
-        const querySnapshot = await getDocs(collection(db, 'pieteikums100km2025'));
+        const querySnapshot = await getDocs(collection(db, 'pieteikums100km2026'));
         
         // Create an array to hold participant data
         const participants = [];
@@ -116,7 +116,7 @@ async function registerParticipant(docId, participantDiv) {
 
     try {
         // Update the participant's KP1 field with the formatted date and time
-        await updateDoc(doc(db, 'pieteikums100km2025', docId), { KP1: currentTime });
+        await updateDoc(doc(db, 'pieteikums100km2026', docId), { KP1: currentTime });
 
         // Move the participant to the registered box
         const registeredBox = document.getElementById('registered-box');
@@ -155,7 +155,7 @@ async function registerParticipant(docId, participantDiv) {
         // Remove registration by setting KP1 to empty and move to the left box
         async function removeRegistration(docId, participantDiv) {
             try {
-                await updateDoc(doc(db, 'pieteikums100km2025', docId), { KP1: "" });
+                await updateDoc(doc(db, 'pieteikums100km2026', docId), { KP1: "" });
                 const participantsBox = document.getElementById('participants-box');
                 participantDiv.querySelector('button').remove();
                 participantDiv.appendChild(createRegisterButton(docId, participantDiv));// Add "Register" button
