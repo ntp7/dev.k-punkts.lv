@@ -34,6 +34,8 @@ async function fetchParticipants() {
             const data = docSnapshot.data();
             if (data.hide) return;
             const docId = docSnapshot.id;
+            const participantDistance = String(data.distance || '').replace(/\s+/g, '').toLowerCase();
+            if (participantDistance !== '100km') return;
 
             // Skip participants where izstajies is true
             if (data.izstajies !== true) {
