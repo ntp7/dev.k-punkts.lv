@@ -1,155 +1,577 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lv">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participants Registration</title>
-    
-    <!-- Import Firebase Libraries -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
-        import firebaseConfig from './firebaseconfig.js';
-    
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-    
-        // Fetch and display participants
-        async function fetchParticipants() {
-            const participantsBox = document.getElementById('participants-box');
-            const registeredBox = document.getElementById('registered-box');
-            participantsBox.innerHTML = "";  // Clear existing data
-            registeredBox.innerHTML = "";    // Clear registered box
-    
-            try {
-                const querySnapshot = await getDocs(collection(db, 'pieteikums100km2026'));
-                
-                // Create an array to hold participant data
-                const participants = [];
-    
-                // Iterate over querySnapshot and push participant data into the array
-                querySnapshot.forEach((docSnapshot) => {
-                    const data = docSnapshot.data();
-                    if (data.hide) return;
-                    const docId = docSnapshot.id;
-    
-                    // Add each participant's data to the array
-                    participants.push({ ...data, id: docId });
-                });
-    
-                // Sort participants by surname
-                participants.sort((a, b) => a.uzvards.localeCompare(b.uzvards)); // Sort by surname
-    
-                // Display participants in respective boxes
-                participants.forEach(participant => {
-                    const participantDiv = createParticipantDiv(participant, participant.izstajies, participant.id);
-                    if (participant.izstajies) {
-                        registeredBox.appendChild(participantDiv); // Move to registered box if "izstajies" is true
-                    } else {
-                        participantsBox.appendChild(participantDiv); // Otherwise, move to unregistered box
-                    }
-                });
-            } catch (error) {
-                console.error("Error fetching participants: ", error);
-            }
-        }
-    
-        // Create a participant entry with name, surname, and buttons
-        function createParticipantDiv(data, isRegistered, docId) {
-            const div = document.createElement('div');
-            div.classList.add('participant');
-    
-            // Fill participant data
-            div.innerHTML = `<strong>${data.uzvards} ${data.vards}</strong>`;
-            
-            if (isRegistered) {
-                // Add "Remove" button to registered participants
-                div.appendChild(createRemoveButton(docId, div));
-            } else {
-                // Add "Register" button to unregistered participants
-                div.appendChild(createRegisterButton(docId, div));
-            }
-    
-            return div;
-        }
-    
-        // Register participant by setting izstajies to true and moving to the registered box
-        async function registerParticipant(docId, participantDiv) {
-            try {
-                // Update the participant's izstajies field to true
-                await updateDoc(doc(db, 'pieteikums100km2026', docId), { izstajies: true });
-    
-                // Move the participant to the registered box
-                const registeredBox = document.getElementById('registered-box');
-                participantDiv.querySelector('button').remove(); // Remove the "Register" button
-                participantDiv.appendChild(createRemoveButton(docId, participantDiv)); // Add the "Remove" button
-    
-                // Append the updated participantDiv to the registered box
-                registeredBox.appendChild(participantDiv);
-            } catch (error) {
-                console.error("Error updating participant: ", error);
-            }
-        }
-    
-        // Remove registration by setting izstajies to false and moving to the unregistered box
-        async function removeRegistration(docId, participantDiv) {
-            try {
-                // Update the participant's izstajies field to false
-                await updateDoc(doc(db, 'pieteikums100km2026', docId), { izstajies: false });
-                
-                // Move the participant back to the unregistered box
-                const participantsBox = document.getElementById('participants-box');
-                participantDiv.querySelector('button').remove(); // Remove the "Remove" button
-                participantDiv.appendChild(createRegisterButton(docId, participantDiv)); // Add the "Register" button
-    
-                // Append the updated participantDiv to the unregistered box
-                participantsBox.appendChild(participantDiv);
-                fetchParticipants();
-            } catch (error) {
-                console.error("Error removing registration: ", error);
-            }
-        }
-    
-        // Helper function to create "Register" button
-        function createRegisterButton(docId, participantDiv) {
-            const registerButton = document.createElement('button');
-            registerButton.textContent = 'Izstājas';
-            registerButton.style.backgroundColor = 'red';
-            registerButton.onclick = () => registerParticipant(docId, participantDiv);
-            return registerButton;
-        }
-    
-        // Helper function to create "Remove" button
-        function createRemoveButton(docId, participantDiv) {
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
-            removeButton.onclick = () => removeRegistration(docId, participantDiv);
-            return removeButton;
-        }
-    
-        // Run fetchParticipants on page load
-        document.addEventListener('DOMContentLoaded', fetchParticipants);
-    </script>
-    
-    <!-- Style for layout and participants boxes -->
-    <link rel="stylesheet" href="styles.css">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Dalībnieka izstāšanās</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
 </head>
+
+
 <body>
 
-    <!-- Container for both boxes -->
-     <h1>Ja dalībnieks izstājas no pārgājiena atzīmē šeit</h1>
+    <h1>
+        Ja dalībnieks izstājas no pārgājiena, atzīmē šeit
+    </h1>
+
+
     <div id="participants-container">
-        <!-- Box for listing unregistered participants -->
+
+        <!-- =====================================================
+             PARTICIPANTS WHO HAVE NOT WITHDRAWN
+             ===================================================== -->
+
         <div id="participants-box">
-            <h2>Unregistered Participants</h2>
+
+            <h2>
+                Participants
+            </h2>
+
         </div>
 
-        <!-- Box for registered participants -->
+
+        <!-- =====================================================
+             PARTICIPANTS WHO HAVE WITHDRAWN
+             ===================================================== -->
+
         <div id="registered-box">
-            <h2>Registered Participants</h2>
+
+            <h2>
+                Izstājušies
+            </h2>
+
         </div>
+
     </div>
 
+
+
+<script type="module">
+
+    // =========================================================
+    // FIREBASE
+    // =========================================================
+
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+
+
+    import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        updateDoc
+    } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
+
+
+    // Normal Firebase WEB configuration.
+    // Safe to expose in frontend code.
+    const firebaseConfig = {
+
+        apiKey:
+            "AIzaSyBMb0jBPIDPdKJhvw8EdTT8zDIjmh9n4Uk",
+
+        authDomain:
+            "kpunkts-617f1.firebaseapp.com",
+
+        projectId:
+            "kpunkts-617f1",
+
+        storageBucket:
+            "kpunkts-617f1.appspot.com",
+
+        messagingSenderId:
+            "402643964732",
+
+        appId:
+            "1:402643964732:web:5d15d7317ace4554a94439"
+
+    };
+
+
+    const app =
+        initializeApp(firebaseConfig);
+
+
+    const db =
+        getFirestore(app);
+
+
+    // =========================================================
+    // PUBLIC COLLECTION
+    // =========================================================
+    //
+    // This page ONLY accesses:
+    //
+    // pieteikums100km2026_public
+    //
+    // It NEVER accesses:
+    //
+    // pieteikums100km2026
+    //
+    // =========================================================
+
+    const PUBLIC_COLLECTION =
+        "pieteikums100km2026_public";
+
+
+    // =========================================================
+    // FETCH PARTICIPANTS
+    // =========================================================
+
+    async function fetchParticipants() {
+
+        const participantsBox =
+            document.getElementById(
+                "participants-box"
+            );
+
+
+        const registeredBox =
+            document.getElementById(
+                "registered-box"
+            );
+
+
+        participantsBox.innerHTML =
+            "<h2>Participants</h2>";
+
+
+        registeredBox.innerHTML =
+            "<h2>Izstājušies</h2>";
+
+
+        try {
+
+            // -------------------------------------------------
+            // READ ONLY PUBLIC COLLECTION
+            // -------------------------------------------------
+
+            const querySnapshot =
+                await getDocs(
+                    collection(
+                        db,
+                        PUBLIC_COLLECTION
+                    )
+                );
+
+
+            const participants = [];
+
+
+            querySnapshot.forEach(
+                (docSnapshot) => {
+
+                    const data =
+                        docSnapshot.data();
+
+
+                    // Don't display hidden participants.
+                    if (
+                        data.hide === true
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    participants.push({
+
+                        ...data,
+
+                        id:
+                            docSnapshot.id
+
+                    });
+
+                }
+            );
+
+
+            // -------------------------------------------------
+            // SORT BY SURNAME
+            // -------------------------------------------------
+
+            participants.sort(
+                (a, b) => {
+
+                    return (
+                        (a.uzvards || "")
+                            .localeCompare(
+                                b.uzvards || "",
+                                "lv"
+                            )
+                    );
+
+                }
+            );
+
+
+            // -------------------------------------------------
+            // DISPLAY
+            // -------------------------------------------------
+
+            participants.forEach(
+                (participant) => {
+
+                    const participantDiv =
+                        createParticipantDiv(
+                            participant,
+                            participant.izstajies === true,
+                            participant.id
+                        );
+
+
+                    if (
+                        participant.izstajies === true
+                    ) {
+
+                        registeredBox.appendChild(
+                            participantDiv
+                        );
+
+                    } else {
+
+                        participantsBox.appendChild(
+                            participantDiv
+                        );
+
+                    }
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Error fetching public participants:",
+                error
+            );
+
+
+            participantsBox.innerHTML += `
+                <p>
+                    Neizdevās ielādēt dalībniekus.
+                </p>
+            `;
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // CREATE PARTICIPANT
+    // =========================================================
+
+    function createParticipantDiv(
+        data,
+        isWithdrawn,
+        docId
+    ) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.classList.add(
+            "participant"
+        );
+
+
+        // -------------------------------------------------
+        // NAME
+        // -------------------------------------------------
+
+        const name =
+            document.createElement(
+                "strong"
+            );
+
+
+        name.textContent =
+            `${data.uzvards || ""} ${data.vards || ""}`;
+
+
+        div.appendChild(
+            name
+        );
+
+
+        // -------------------------------------------------
+        // WITHDRAWN
+        // -------------------------------------------------
+
+        if (isWithdrawn) {
+
+            const removeButton =
+                createRemoveButton(
+                    docId,
+                    div
+                );
+
+
+            div.appendChild(
+                removeButton
+            );
+
+
+        } else {
+
+            // -------------------------------------------------
+            // NOT WITHDRAWN
+            // -------------------------------------------------
+
+            const registerButton =
+                createRegisterButton(
+                    docId,
+                    div
+                );
+
+
+            div.appendChild(
+                registerButton
+            );
+
+        }
+
+
+        return div;
+
+    }
+
+
+
+    // =========================================================
+    // MARK PARTICIPANT AS WITHDRAWN
+    // =========================================================
+
+    async function registerParticipant(
+        docId,
+        participantDiv
+    ) {
+
+        try {
+
+            // -------------------------------------------------
+            // UPDATE ONLY THE PUBLIC DOCUMENT
+            // -------------------------------------------------
+
+            await updateDoc(
+                doc(
+                    db,
+                    PUBLIC_COLLECTION,
+                    docId
+                ),
+                {
+                    izstajies: true
+                }
+            );
+
+
+            // -------------------------------------------------
+            // RELOAD
+            // -------------------------------------------------
+
+            await fetchParticipants();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error marking participant as withdrawn:",
+                error
+            );
+
+
+            alert(
+                "Neizdevās atzīmēt dalībnieku kā izstājušos. Pārbaudiet piekļuves tiesības."
+            );
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // REMOVE WITHDRAWAL STATUS
+    // =========================================================
+
+    async function removeRegistration(
+        docId,
+        participantDiv
+    ) {
+
+        try {
+
+            // -------------------------------------------------
+            // UPDATE ONLY THE PUBLIC DOCUMENT
+            // -------------------------------------------------
+
+            await updateDoc(
+                doc(
+                    db,
+                    PUBLIC_COLLECTION,
+                    docId
+                ),
+                {
+                    izstajies: false
+                }
+            );
+
+
+            // -------------------------------------------------
+            // RELOAD
+            // -------------------------------------------------
+
+            await fetchParticipants();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error removing withdrawal status:",
+                error
+            );
+
+
+            alert(
+                "Neizdevās noņemt izstāšanās statusu."
+            );
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // "IZSTĀJAS" BUTTON
+    // =========================================================
+
+    function createRegisterButton(
+        docId,
+        participantDiv
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.textContent =
+            "Izstājas";
+
+
+        button.style.backgroundColor =
+            "red";
+
+
+        button.addEventListener(
+            "click",
+            async () => {
+
+                button.disabled =
+                    true;
+
+
+                await registerParticipant(
+                    docId,
+                    participantDiv
+                );
+
+            }
+        );
+
+
+        return button;
+
+    }
+
+
+
+    // =========================================================
+    // REMOVE BUTTON
+    // =========================================================
+
+    function createRemoveButton(
+        docId,
+        participantDiv
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.textContent =
+            "Remove";
+
+
+        button.addEventListener(
+            "click",
+            async () => {
+
+                button.disabled =
+                    true;
+
+
+                await removeRegistration(
+                    docId,
+                    participantDiv
+                );
+
+            }
+        );
+
+
+        return button;
+
+    }
+
+
+
+    // =========================================================
+    // START
+    // =========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        fetchParticipants
+    );
+
+</script>
+
 </body>
+
 </html>

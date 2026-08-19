@@ -1,210 +1,740 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lv">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participants Registration</title>
-    
-    <!-- Import Firebase Libraries -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
-        import firebaseConfig from './firebaseconfig.js';
-    
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-    
-        // Fetch and display participants
-// Fetch and display participants
-async function fetchParticipants() {
-    const participantsBox = document.getElementById('participants-box');
-    const registeredBox = document.getElementById('registered-box');
-    participantsBox.innerHTML = "";  // Clear existing data
-    registeredBox.innerHTML = "";    // Clear registered box
 
-    try {
-        const querySnapshot = await getDocs(collection(db, 'pieteikums100km2026'));
-        
-        // Create an array to hold participant data
-        const participants = [];
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-        // Iterate over querySnapshot and push participant data into the array
-        querySnapshot.forEach((docSnapshot) => {
-            const data = docSnapshot.data();
-            if (data.hide) return;
-            const docId = docSnapshot.id;
+    <title>KP1 - Iecavas kultūras nams</title>
 
-            // Skip participants where izstajies is true
-            if (data.izstajies !== true) {
-                participants.push({ ...data, id: docId });
-            }
-        });
-
-        // Sort participants by surname
-        participants.sort((a, b) => {
-            return a.uzvards.localeCompare(b.uzvards); // Sort by surname
-        });
-
-        // Display participants in respective boxes
-        participants.forEach(participant => {
-            const participantDiv = createParticipantDiv(participant, !!participant.KP1, participant.id);
-            if (participant.KP1) {
-                registeredBox.appendChild(participantDiv);
-            } else {
-                participantsBox.appendChild(participantDiv);
-            }
-        });
-    } catch (error) {
-        console.error("Error fetching participants: ", error);
-    }
-}
-
-    
-        // Create a participant entry with name, surname, and buttons
-        // Create a participant entry with name, surname, and buttons
-function createParticipantDiv(data, isRegistered, docId) {
-    const div = document.createElement('div');
-    div.classList.add('participant');
-
-    // Fill participant data
-    div.innerHTML = `<strong>${data.uzvards} ${data.vards}</strong>`;
-    
-    if (isRegistered) {
-        // Append KP1 if the participant is registered
-        const kp1Span = document.createElement('span');
-        kp1Span.textContent = `(${data.KP1})`;
-        kp1Span.style.marginRight = '10px';
-
-        const kp1Container = document.createElement('div');
-        kp1Container.style.display = 'flex';
-        kp1Container.style.alignItems = 'center';
-
-        kp1Container.appendChild(kp1Span);
-        // Add "Remove" button to registered participants
-        const removeButton = createRemoveButton(docId, div);
-        kp1Container.appendChild(removeButton);
-        div.appendChild(kp1Container);
-    } else {
-        // Add "Register" button to unregistered participants
-        const registerButton = createRegisterButton(docId, div);
-        div.appendChild(registerButton);
-    }
-
-    return div;
-}
-
-    
-        // Register participant by setting KP1 to the current time and move to the right box
-// Register participant by setting KP1 to the current date and time, and move to the right box
-// Register participant by setting KP1 to the current date and time, and move to the right box
-// Register participant by setting KP1 to the current date and time, and move to the right box
-// Register participant by setting KP1 to the current date and time, and move to the right box
-async function registerParticipant(docId, participantDiv) {
-    const now = new Date();
-
-    // Get day, month, year, hours, minutes, and seconds
-    const day = now.getDate().toString().padStart(2, '0');       // Ensure two digits for the day
-    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Ensure two digits for the month
-    const year = now.getFullYear();
-    const hours = now.getHours().toString().padStart(2, '0');  // Ensure two digits for hours
-    const minutes = now.getMinutes().toString().padStart(2, '0'); // Ensure two digits for minutes
-    const seconds = now.getSeconds().toString().padStart(2, '0'); // Ensure two digits for seconds
-
-    // Format the date as "dd/mm/yyyy hh:mm:ss"
-    const currentTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-
-    try {
-        // Update the participant's KP1 field with the formatted date and time
-        await updateDoc(doc(db, 'pieteikums100km2026', docId), { KP1: currentTime });
-
-        // Move the participant to the registered box
-        const registeredBox = document.getElementById('registered-box');
-        participantDiv.querySelector('button').remove(); // Remove register button
-
-        // Create a container div for KP1 and the remove button
-        const kp1Container = document.createElement('div');
-        kp1Container.style.display = 'flex';
-        kp1Container.style.alignItems = 'center';
-        
-        // Create a span element for KP1 and append it to the container
-        const kp1Span = document.createElement('span');
-        kp1Span.textContent = `(${currentTime})`; // Set the text content to the formatted date and time
-        kp1Span.style.marginRight = '10px'; // Add some right margin for spacing
-        kp1Container.appendChild(kp1Span);
-
-        // Add the remove button to the container
-        kp1Container.appendChild(createRemoveButton(docId, participantDiv));
-
-        // Append the container div to participantDiv
-        participantDiv.appendChild(kp1Container);
-        
-        // Move the updated participantDiv to the registered box
-        registeredBox.appendChild(participantDiv);
-    } catch (error) {
-        console.error("Error updating participant: ", error);
-    }
-}
-
-
-
-
-
-
-    
-        // Remove registration by setting KP1 to empty and move to the left box
-        async function removeRegistration(docId, participantDiv) {
-            try {
-                await updateDoc(doc(db, 'pieteikums100km2026', docId), { KP1: "" });
-                const participantsBox = document.getElementById('participants-box');
-                participantDiv.querySelector('button').remove();
-                participantDiv.appendChild(createRegisterButton(docId, participantDiv));// Add "Register" button
-                participantsBox.appendChild(participantDiv);
-                fetchParticipants();
-            }
-            
-            catch (error) {
-                console.error("Error removing registration: ", error);
-            }
-        }
-        // Helper function to create "Register" button
-        function createRegisterButton(docId, participantDiv) {
-            const registerButton = document.createElement('button');
-            registerButton.textContent = 'Register';
-            registerButton.onclick = () => registerParticipant(docId, participantDiv);
-            return registerButton;
-        }
-    
-        // Helper function to create "Remove" button
-        function createRemoveButton(docId, participantDiv) {
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
-            removeButton.onclick = () => removeRegistration(docId, participantDiv);
-            return removeButton;
-        }
-    
-        // Run fetchParticipants on page load
-        document.addEventListener('DOMContentLoaded', fetchParticipants);
-    </script>
-    
-    <!-- Style for layout and participants boxes -->
-    <link rel="stylesheet" href="styles.css">
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
 </head>
+
+
 <body>
 
-    <!-- Container for both boxes -->
-     <h1>KP1 - Iecavas kultūras nams</h1>
+    <h1>KP1 - Iecavas kultūras nams</h1>
+
+
     <div id="participants-container">
-        <!-- Box for listing unregistered participants -->
+
+        <!-- UNREGISTERED -->
         <div id="participants-box">
-            <h2>Unregistered Participants</h2>
+
+            <h2>
+                Unregistered Participants
+            </h2>
+
         </div>
 
-        <!-- Box for registered participants -->
+
+        <!-- REGISTERED -->
         <div id="registered-box">
-            <h2>Registered Participants</h2>
+
+            <h2>
+                Registered Participants
+            </h2>
+
         </div>
+
     </div>
 
+
+
+<script type="module">
+
+    // =========================================================
+    // FIREBASE
+    // =========================================================
+
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+
+
+    import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        updateDoc
+    } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
+
+
+    // Normal Firebase WEB configuration.
+    // This is frontend configuration and is safe to expose.
+    const firebaseConfig = {
+
+        apiKey:
+            "AIzaSyBMb0jBPIDPdKJhvw8EdTT8zDIjmh9n4Uk",
+
+        authDomain:
+            "kpunkts-617f1.firebaseapp.com",
+
+        projectId:
+            "kpunkts-617f1",
+
+        storageBucket:
+            "kpunkts-617f1.appspot.com",
+
+        messagingSenderId:
+            "402643964732",
+
+        appId:
+            "1:402643964732:web:5d15d7317ace4554a94439"
+
+    };
+
+
+    const app =
+        initializeApp(firebaseConfig);
+
+
+    const db =
+        getFirestore(app);
+
+
+    // =========================================================
+    // IMPORTANT
+    // =========================================================
+    //
+    // This page ONLY accesses:
+    //
+    // pieteikums100km2026_public
+    //
+    // It NEVER accesses:
+    //
+    // pieteikums100km2026
+    //
+    // =========================================================
+
+    const PUBLIC_COLLECTION =
+        "pieteikums100km2026_public";
+
+
+
+    // =========================================================
+    // FETCH PARTICIPANTS
+    // =========================================================
+
+    async function fetchParticipants() {
+
+        const participantsBox =
+            document.getElementById(
+                "participants-box"
+            );
+
+
+        const registeredBox =
+            document.getElementById(
+                "registered-box"
+            );
+
+
+        participantsBox.innerHTML =
+            "<h2>Unregistered Participants</h2>";
+
+
+        registeredBox.innerHTML =
+            "<h2>Registered Participants</h2>";
+
+
+        try {
+
+            // -----------------------------------------------------
+            // READ ONLY PUBLIC COLLECTION
+            // -----------------------------------------------------
+
+            const querySnapshot =
+                await getDocs(
+                    collection(
+                        db,
+                        PUBLIC_COLLECTION
+                    )
+                );
+
+
+            const participants = [];
+
+
+            querySnapshot.forEach(
+                (docSnapshot) => {
+
+                    const data =
+                        docSnapshot.data();
+
+
+                    // Hide participant if requested.
+                    if (
+                        data.hide === true
+                    ) {
+                        return;
+                    }
+
+
+                    // Do not show participants who have left.
+                    if (
+                        data.izstajies === true
+                    ) {
+                        return;
+                    }
+
+
+                    const docId =
+                        docSnapshot.id;
+
+
+                    participants.push({
+
+                        ...data,
+
+                        id: docId
+
+                    });
+
+                }
+            );
+
+
+            // -----------------------------------------------------
+            // SORT BY SURNAME
+            // -----------------------------------------------------
+
+            participants.sort(
+                (a, b) => {
+
+                    return (
+                        (a.uzvards || "")
+                            .localeCompare(
+                                b.uzvards || "",
+                                "lv"
+                            )
+                    );
+
+                }
+            );
+
+
+            // -----------------------------------------------------
+            // DISPLAY
+            // -----------------------------------------------------
+
+            participants.forEach(
+                (participant) => {
+
+                    const participantDiv =
+                        createParticipantDiv(
+                            participant,
+                            Boolean(
+                                participant.KP1
+                            ),
+                            participant.id
+                        );
+
+
+                    if (
+                        participant.KP1
+                    ) {
+
+                        registeredBox.appendChild(
+                            participantDiv
+                        );
+
+                    } else {
+
+                        participantsBox.appendChild(
+                            participantDiv
+                        );
+
+                    }
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Error fetching public participants:",
+                error
+            );
+
+
+            participantsBox.innerHTML += `
+                <p>
+                    Neizdevās ielādēt dalībniekus.
+                </p>
+            `;
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // CREATE PARTICIPANT
+    // =========================================================
+
+    function createParticipantDiv(
+        data,
+        isRegistered,
+        docId
+    ) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.classList.add(
+            "participant"
+        );
+
+
+        // -----------------------------------------------------
+        // NAME
+        // -----------------------------------------------------
+
+        const name =
+            document.createElement(
+                "strong"
+            );
+
+
+        name.textContent =
+            `${data.uzvards || ""} ${data.vards || ""}`;
+
+
+        div.appendChild(
+            name
+        );
+
+
+        // -----------------------------------------------------
+        // REGISTERED
+        // -----------------------------------------------------
+
+        if (isRegistered) {
+
+
+            const kp1Container =
+                document.createElement(
+                    "div"
+                );
+
+
+            kp1Container.style.display =
+                "flex";
+
+
+            kp1Container.style.alignItems =
+                "center";
+
+
+            // KP1 TIME
+
+            const kp1Span =
+                document.createElement(
+                    "span"
+                );
+
+
+            kp1Span.textContent =
+                `(${data.KP1})`;
+
+
+            kp1Span.style.marginRight =
+                "10px";
+
+
+            kp1Container.appendChild(
+                kp1Span
+            );
+
+
+            // REMOVE BUTTON
+
+            kp1Container.appendChild(
+                createRemoveButton(
+                    docId,
+                    div
+                )
+            );
+
+
+            div.appendChild(
+                kp1Container
+            );
+
+
+        } else {
+
+
+            // -------------------------------------------------
+            // NOT REGISTERED
+            // -------------------------------------------------
+
+            div.appendChild(
+                createRegisterButton(
+                    docId,
+                    div
+                )
+            );
+
+        }
+
+
+        return div;
+
+    }
+
+
+
+    // =========================================================
+    // REGISTER PARTICIPANT
+    // =========================================================
+
+    async function registerParticipant(
+        docId,
+        participantDiv
+    ) {
+
+        const now =
+            new Date();
+
+
+        // -----------------------------------------------------
+        // FORMAT TIME
+        // DD/MM/YYYY HH:mm:ss
+        // -----------------------------------------------------
+
+        const day =
+            String(
+                now.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const month =
+            String(
+                now.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const year =
+            now.getFullYear();
+
+
+        const hours =
+            String(
+                now.getHours()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const minutes =
+            String(
+                now.getMinutes()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const seconds =
+            String(
+                now.getSeconds()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const currentTime =
+            `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+
+
+        try {
+
+            // -------------------------------------------------
+            // UPDATE PUBLIC COLLECTION
+            // -------------------------------------------------
+
+            await updateDoc(
+                doc(
+                    db,
+                    PUBLIC_COLLECTION,
+                    docId
+                ),
+                {
+                    KP1: currentTime
+                }
+            );
+
+
+            // -------------------------------------------------
+            // UPDATE UI
+            // -------------------------------------------------
+
+            const registeredBox =
+                document.getElementById(
+                    "registered-box"
+                );
+
+
+            const registerButton =
+                participantDiv.querySelector(
+                    "button"
+                );
+
+
+            if (registerButton) {
+
+                registerButton.remove();
+
+            }
+
+
+            const kp1Container =
+                document.createElement(
+                    "div"
+                );
+
+
+            kp1Container.style.display =
+                "flex";
+
+
+            kp1Container.style.alignItems =
+                "center";
+
+
+            const kp1Span =
+                document.createElement(
+                    "span"
+                );
+
+
+            kp1Span.textContent =
+                `(${currentTime})`;
+
+
+            kp1Span.style.marginRight =
+                "10px";
+
+
+            kp1Container.appendChild(
+                kp1Span
+            );
+
+
+            kp1Container.appendChild(
+                createRemoveButton(
+                    docId,
+                    participantDiv
+                )
+            );
+
+
+            participantDiv.appendChild(
+                kp1Container
+            );
+
+
+            registeredBox.appendChild(
+                participantDiv
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Error updating public participant:",
+                error
+            );
+
+
+            alert(
+                "Neizdevās reģistrēt dalībnieku. Pārbaudiet piekļuves tiesības."
+            );
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // REMOVE REGISTRATION
+    // =========================================================
+
+    async function removeRegistration(
+        docId,
+        participantDiv
+    ) {
+
+        try {
+
+            // -------------------------------------------------
+            // REMOVE KP1 FROM PUBLIC COLLECTION
+            // -------------------------------------------------
+
+            await updateDoc(
+                doc(
+                    db,
+                    PUBLIC_COLLECTION,
+                    docId
+                ),
+                {
+                    KP1: ""
+                }
+            );
+
+
+            // -------------------------------------------------
+            // RELOAD UI
+            // -------------------------------------------------
+
+            await fetchParticipants();
+
+
+        } catch (error) {
+
+            console.error(
+                "Error removing registration:",
+                error
+            );
+
+
+            alert(
+                "Neizdevās noņemt KP1."
+            );
+
+        }
+
+    }
+
+
+
+    // =========================================================
+    // REGISTER BUTTON
+    // =========================================================
+
+    function createRegisterButton(
+        docId,
+        participantDiv
+    ) {
+
+        const registerButton =
+            document.createElement(
+                "button"
+            );
+
+
+        registerButton.textContent =
+            "Register";
+
+
+        registerButton.type =
+            "button";
+
+
+        registerButton.addEventListener(
+            "click",
+            () => {
+
+                registerButton.disabled =
+                    true;
+
+
+                registerParticipant(
+                    docId,
+                    participantDiv
+                );
+
+            }
+        );
+
+
+        return registerButton;
+
+    }
+
+
+
+    // =========================================================
+    // REMOVE BUTTON
+    // =========================================================
+
+    function createRemoveButton(
+        docId,
+        participantDiv
+    ) {
+
+        const removeButton =
+            document.createElement(
+                "button"
+            );
+
+
+        removeButton.textContent =
+            "Remove";
+
+
+        removeButton.type =
+            "button";
+
+
+        removeButton.addEventListener(
+            "click",
+            () => {
+
+                removeButton.disabled =
+                    true;
+
+
+                removeRegistration(
+                    docId,
+                    participantDiv
+                );
+
+            }
+        );
+
+
+        return removeButton;
+
+    }
+
+
+
+    // =========================================================
+    // START
+    // =========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        fetchParticipants
+    );
+
+</script>
+
 </body>
+
 </html>
